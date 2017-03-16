@@ -29,6 +29,7 @@ def footer():
     is_find_start = True
     count = 0
     start, end = 0, 0 # assign this vars prepare if we dont' have downtime
+    error_dict = {}
 
     for task in tasks:
         if is_find_start:
@@ -37,12 +38,16 @@ def footer():
                 start = task.get('timestamp')
         else:
             count += 1
+	    try:
+		error_dict[task.get('status')] += 1
+	    except:
+		error_dict[task.get('status')] = 1
             if task.get('status') == 200:
                 end = task.get('timestamp')
-                break
-
+    
     print("Downtime for rolling upgrade process: {} ms" .format(end-start))
-    print("Number of fail requests (status: 503): {}" .format(count))
+    print("Number of fail requests (status code >= 400): {}" .format(count))
+    print(error_dict)
 
 
 def exit_gracefully(signum, frame):
