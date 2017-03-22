@@ -38,12 +38,12 @@ def footer():
                 start = task.get('timestamp')
         else:
             count += 1
-	    try:
-		error_dict[task.get('status')] += 1
-	    except:
-		error_dict[task.get('status')] = 1
-            if task.get('status') == 200:
-                end = task.get('timestamp')
+            try:
+                error_dict[task.get('status')] += 1
+            except:
+                error_dict[task.get('status')] = 1
+                if task.get('status') / 100 == 2:
+                    end = task.get('timestamp')
     
     print("Downtime for rolling upgrade process: {} ms" .format(end-start))
     print("Number of fail requests (status code >= 400): {}" .format(count))
@@ -66,8 +66,23 @@ def exit_gracefully(signum, frame):
     signal.signal(signal.SIGINT, exit_gracefully)
 
 
-def send_get_request(url, headers=None):
-    session.get(url, headers=headers, background_callback=bg_cb)
+def send_request(url, method, headers=None, data=None, **kwargs):
+    if method == 'GET':
+        return session.get(url, headers=headers,
+                           background_callback=bg_cb, **kwargs)
+    elif method == 'POST':
+        return session.post(url, headers=headers,
+                            data=data, background_callback=bg_cb, **kwargs)
+    elif method == 'PUT':
+        return session.put(url, headers=headers,
+                           data=data, background_callback=bg_cb, **kwargs)
+    elif method == 'PATCH':
+        return session.patch(url, headers=headers,
+                             data=data, background_callback=bg_cb, **kwargs)
+    elif method == 'DELETE':
+        return session.delete(url, headers=headers, background_callback=bg_cb, **kwargs)
+    else:
+        print("Method does not support: {}" .format(method))
 
 
 original_sigint = signal.getsignal(signal.SIGINT)
