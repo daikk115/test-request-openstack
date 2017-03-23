@@ -70,8 +70,7 @@ if __name__ == '__main__':
                               headers=post_headers, data=json.JSONEncoder().encode(post_data))
             content = future.result().content
         except:
-            # In case, we can't create image in database
-            # or not graceful shutdown --> Connection Error
+            # In case, not graceful shutdown --> Connection Error
             continue
         image_id = json.loads(content).get('id')
 
@@ -80,7 +79,7 @@ if __name__ == '__main__':
         f = open(image_path, 'rb')
         chunk_data = _chunk_body(f)
         put_result = send_request(put_url, 'PUT',
-                                  headers=put_headers, data=f, stream=True)
+                                  headers=put_headers, data=chunk_data, stream=True)
         # f.close()
         a = put_result.result().content
 
